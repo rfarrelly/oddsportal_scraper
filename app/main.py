@@ -8,13 +8,10 @@ from config.config import (
     OUTPUT_DATE_FORMAT,
 )
 from datetime import datetime
-import pytz
 
 
 def scrape_webpage(url):
-
     driver = webdriver.Chrome()
-
     driver.get(url)
 
     WebDriverWait(driver, 10).until(
@@ -77,6 +74,7 @@ def scrape_webpage(url):
         "odds": odds,
         "home": home_team,
         "away": away_team,
+        "market": url.split("/")[7].replace("#", "").split(";")[0].replace("#", ""),
         "book": ODDSPORTAL_LOCATORS["ODDS_XPATH"].split("/")[4],
     }
 
@@ -98,12 +96,6 @@ def parse_datetime(date: str) -> tuple[datetime]:
     parsed_time = datetime.strptime(event_time, "%H:%M").time()
 
     event_datetime = datetime.combine(parsed_date, parsed_time)
-
-    utc_timezone = pytz.utc
-    uk_timezone = pytz.timezone("Europe/London")
-
-    event_datetime = utc_timezone.localize(event_datetime)
-    event_datetime = event_datetime.astimezone(uk_timezone)
 
     return event_datetime.date(), event_datetime.time(), event_day
 
