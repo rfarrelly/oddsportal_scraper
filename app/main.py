@@ -8,6 +8,7 @@ from config.config import (
     OUTPUT_DATE_FORMAT,
 )
 from datetime import datetime
+from fractions import Fraction
 
 
 def scrape_webpage(url):
@@ -71,7 +72,7 @@ def scrape_webpage(url):
         "time": event_time.strftime("%H:%M"),
         "day": event_day,
         "league": f"{url.split('/')[4]}-{url.split('/')[5]}",
-        "odds": odds,
+        "odds": [float(Fraction(f)) + 1 for f in odds],
         "home": home_team,
         "away": away_team,
         "market": url.split("/")[7].replace("#", "").split(";")[0].replace("#", ""),
