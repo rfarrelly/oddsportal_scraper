@@ -9,10 +9,15 @@ from config.config import (
 )
 from datetime import datetime
 from fractions import Fraction
+from links.get_match_links import get_links
+
+import pandas as pd
 
 
 def scrape_webpage(url):
-    driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(options=options)
     driver.get(url)
 
     WebDriverWait(driver, 10).until(
@@ -72,7 +77,7 @@ def scrape_webpage(url):
         "time": event_time,
         "day": event_day,
         "league": f"{url.split('/')[4]}-{url.split('/')[5]}",
-        "odds": [float(Fraction(f)) + 1 for f in odds],
+        "odds": [round(float(Fraction(f)), 2) for f in odds],
         "home": home_team,
         "away": away_team,
         "market": url.split("/")[7].replace("#", "").split(";")[0].replace("#", ""),
@@ -106,11 +111,35 @@ def parse_datetime(date: str) -> tuple[str]:
 
 
 def main():
-    data = scrape_webpage(
-        "https://www.oddsportal.com/football/england/premier-league/nottingham-manchester-city-W2wDbEZq/#1X2;2"
-    )
 
-    print(data)
+    links = get_links("england/premier-league/", "btts")
+
+    data = []
+    failures = []
+
+    for link in links:
+        print(f"Processing: {link}")
+        try:
+            data.append(scrape_webpage(link))
+        except Exception as e:
+            failures.append(link)
+            print(f"{link} Failed: {e}")
+            continue
+
+    # Retry failed links once more
+    if failures:
+        for link in failures:
+            print(f"Trying link again: {link}")
+            try:
+                data.append(scrape_webpage(link))
+                failures.remove(link)
+            except Exception as e:
+                print(f"{link} Failed again: {e}")
+                continue
+
+    data_df = pd.DataFrame(data)
+
+    print(data_df)
 
 
 if __name__ == "__main__":
