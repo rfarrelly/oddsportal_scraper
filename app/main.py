@@ -66,15 +66,16 @@ def scrape_webpage(url):
         )
 
         date_element = date_elements[0].text
-        event_date, event_time = parse_datetime(date_element)
-        event_date_str = format_date(event_date, event_time)
-        print(event_date_str)
+        event_date, event_time, event_day = parse_datetime(date_element)
+
     except Exception as e:
         print(f"Error getting date: {url} - {e}")
 
     data = {
         "timestamp": datetime.now().isoformat(sep=" ", timespec="minutes"),
-        "date": event_date_str if event_date_str else "unknown",
+        "date": event_date.strftime(OUTPUT_DATE_FORMAT),
+        "time": event_time.strftime("%H:%M"),
+        "day": event_day,
         "league": f"{url.split('/')[4]}-{url.split('/')[5]}",
         "odds": odds,
         "home": home_team,
@@ -92,6 +93,7 @@ def scrape_webpage(url):
 
 def parse_datetime(date: str) -> tuple[datetime]:
     date_parts = date.split(",")
+    event_day = date_parts[0].replace("\n", "")
     event_date = date_parts[1].replace("\n", "")
     event_time = date_parts[2].replace("\n", "").strip()
 
@@ -106,11 +108,7 @@ def parse_datetime(date: str) -> tuple[datetime]:
     event_datetime = utc_timezone.localize(event_datetime)
     event_datetime = event_datetime.astimezone(uk_timezone)
 
-    return event_datetime.date(), event_datetime.time()
-
-
-def format_date(event_date, event_time):
-    return f"{event_date.strftime(OUTPUT_DATE_FORMAT)} {event_time.strftime('%H:%M')}"
+    return event_datetime.date(), event_datetime.time(), event_day
 
 
 def main():
