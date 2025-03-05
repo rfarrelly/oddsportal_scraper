@@ -26,7 +26,6 @@ def scrape_webpage(url):
             x.text
             for x in driver.find_elements(By.XPATH, ODDSPORTAL_LOCATORS["ODDS_XPATH"])
         ]
-        print(odds)
     except Exception as e:
         print(f"Error getting odds: {e}")
 
@@ -39,7 +38,6 @@ def scrape_webpage(url):
             By.XPATH, ODDSPORTAL_LOCATORS["HOME_XPATH"]
         )
         home_team = home_elements[0].text
-        print(home_team)
     except Exception as e:
         print(f"Error getting home team: {url} - {e}")
 
@@ -52,7 +50,6 @@ def scrape_webpage(url):
             By.XPATH, ODDSPORTAL_LOCATORS["AWAY_XPATH"]
         )
         away_team = away_elements[0].text
-        print(away_team)
     except Exception as e:
         print(f"Error getting away team: {url} - {e}")
 
