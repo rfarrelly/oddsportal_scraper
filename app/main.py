@@ -68,8 +68,8 @@ def scrape_webpage(url):
 
     data = {
         "timestamp": datetime.now().isoformat(sep=" ", timespec="minutes"),
-        "date": event_date.strftime(OUTPUT_DATE_FORMAT),
-        "time": event_time.strftime("%H:%M"),
+        "date": event_date,
+        "time": event_time,
         "day": event_day,
         "league": f"{url.split('/')[4]}-{url.split('/')[5]}",
         "odds": [float(Fraction(f)) + 1 for f in odds],
@@ -87,7 +87,7 @@ def scrape_webpage(url):
     return data
 
 
-def parse_datetime(date: str) -> tuple[datetime]:
+def parse_datetime(date: str) -> tuple[str]:
     date_parts = date.split(",")
     event_day = date_parts[0].replace("\n", "")
     event_date = date_parts[1].replace("\n", "")
@@ -98,7 +98,11 @@ def parse_datetime(date: str) -> tuple[datetime]:
 
     event_datetime = datetime.combine(parsed_date, parsed_time)
 
-    return event_datetime.date(), event_datetime.time(), event_day
+    return (
+        event_datetime.date().strftime(OUTPUT_DATE_FORMAT),
+        event_datetime.time().strftime("%H:%M"),
+        event_day,
+    )
 
 
 def main():
