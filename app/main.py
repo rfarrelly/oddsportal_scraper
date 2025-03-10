@@ -6,12 +6,14 @@ from config.config import (
     ODDSPORTAL_LOCATORS,
     ODDSPORTAL_DATE_FORMAT,
     OUTPUT_DATE_FORMAT,
+    ODDSPORTAL_FOOTBALL_SUBDOMAINS,
 )
 from datetime import datetime
 from fractions import Fraction
 from links.get_match_links import get_links
 
 import pandas as pd
+from itertools import chain
 
 
 def scrape_webpage(url):
@@ -84,6 +86,9 @@ def scrape_webpage(url):
         "book": ODDSPORTAL_LOCATORS["ODDS_XPATH"].split("/")[4],
     }
 
+    data = expand_odds_fields(data)
+    data.pop("odds")
+
     try:
         driver.quit()
     except Exception as e:
@@ -106,14 +111,25 @@ def parse_datetime(date: str) -> tuple[str]:
     return (
         event_datetime.date().strftime(OUTPUT_DATE_FORMAT),
         event_datetime.time().strftime("%H:%M"),
-        event_day,
+        event_datetime.strftime("%A"),
     )
+
+
+def expand_odds_fields(data: dict):
+    if data["market"] == "1X2":
+        data[f"{data["book"]}H"] = data["odds"][0]
+        data[f"{data["book"]}D"] = data["odds"][1]
+        data[f"{data["book"]}A"] = data["odds"][2]
+    return data
 
 
 def main():
 
-    links = get_links("england/premier-league/", "btts")
+    links = []
+    for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS:
+        links.append(get_links(league, "1X2"))
 
+    links = list(chain(*links))
     data = []
     failures = []
 
@@ -137,9 +153,9 @@ def main():
                 print(f"{link} Failed again: {e}")
                 continue
 
-    data_df = pd.DataFrame(data)
+    data_df = pd.DataFrame(data).sort_values("date")
 
-    print(data_df)
+    data_df.to_csv("fixtures.csv", index=False)
 
 
 if __name__ == "__main__":

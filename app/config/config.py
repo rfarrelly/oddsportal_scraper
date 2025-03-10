@@ -45,7 +45,7 @@ ODDSPORTAL_LOCATORS = {
 
 ODDSPORTAL_MARKETS = {
     "btts": "/#bts;2",
-    "match_odds": "/#1X2;2",
+    "1X2": "/#1X2;2",
     "O1.5": "/#over-under;2;1.50;0",
     "O2.5": "/#over-under;2;2.50;0",
 }
