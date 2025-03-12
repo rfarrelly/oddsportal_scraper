@@ -11,7 +11,6 @@ from config.config import (
 from datetime import datetime
 from fractions import Fraction
 from links.get_match_links import get_links
-
 import pandas as pd
 from itertools import chain
 
@@ -99,7 +98,6 @@ def scrape_webpage(url):
 
 def parse_datetime(date: str) -> tuple[str]:
     date_parts = date.split(",")
-    event_day = date_parts[0].replace("\n", "")
     event_date = date_parts[1].replace("\n", "")
     event_time = date_parts[2].replace("\n", "").strip()
 
@@ -125,32 +123,19 @@ def expand_odds_fields(data: dict):
 
 def main():
 
-    links = []
-    for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS:
-        links.append(get_links(league, "1X2"))
-
+    links = [get_links(league, "1X2") for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS]
     links = list(chain(*links))
+
     data = []
-    failures = []
 
-    for link in links:
-        print(f"Processing: {link}")
-        try:
-            data.append(scrape_webpage(link))
-        except Exception as e:
-            failures.append(link)
-            print(f"{link} Failed: {e}")
-            continue
-
-    # Retry failed links once more
-    if failures:
-        for link in failures:
-            print(f"Trying link again: {link}")
+    while links:
+        for link in links:
+            print(f"Processing: {link}")
             try:
                 data.append(scrape_webpage(link))
-                failures.remove(link)
+                links.remove(link)
             except Exception as e:
-                print(f"{link} Failed again: {e}")
+                print(f"{link} Failed: {e}")
                 continue
 
     data_df = pd.DataFrame(data).sort_values("date")
