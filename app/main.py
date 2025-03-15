@@ -14,6 +14,13 @@ from links.get_match_links import get_links
 import pandas as pd
 from itertools import chain
 
+import signal
+import sys
+
+
+data = []
+links = []
+
 
 def scrape_webpage(url):
     options = webdriver.ChromeOptions()
@@ -121,15 +128,30 @@ def expand_odds_fields(data: dict):
     return data
 
 
+def handle_exit(signum, frame):
+    print("\nGracefully shutting down...")
+
+    if data:
+        data_df = pd.DataFrame(data).sort_values("date")
+        data_df.to_csv("fixtures.csv", index=False)
+        print("Saved collected data to fixtures.csv")
+
+    print(f"Failed Links: {links}")
+    sys.exit(0)
+
+
 def main():
+    global data, links  # Make them accessible in the signal handler
+
+    # Register the signal handler
+    signal.signal(signal.SIGINT, handle_exit)
 
     links = [get_links(league, "1X2") for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS]
     links = list(chain(*links))
 
-    data = []
-
     while links:
         for link in links:
+            print(f"Number of remaining links: {len(links)}")
             print(f"Processing: {link}")
             try:
                 data.append(scrape_webpage(link))
@@ -138,9 +160,8 @@ def main():
                 print(f"{link} Failed: {e}")
                 continue
 
-    data_df = pd.DataFrame(data).sort_values("date")
-
-    data_df.to_csv("fixtures.csv", index=False)
+    # Normal script completion, saving data
+    handle_exit(None, None)  # Call cleanup manually if script finishes normally
 
 
 if __name__ == "__main__":

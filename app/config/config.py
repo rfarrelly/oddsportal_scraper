@@ -13,10 +13,10 @@ ODDSPORTAL_REQUEST_HEADER = {
 
 ODDSPORTAL_FOOTBALL_SUBDOMAINS = [
     "england/premier-league/",
-    # "england/championship/",
-    # "england/league-one/",
-    # "england/league-two/",
-    # "england/national-league/",
+    "england/championship/",
+    "england/league-one/",
+    "england/league-two/",
+    "england/national-league/",
     # "scotland/premiership/",
     # "scotland/championship/",
     # "scotland/league-one/",
