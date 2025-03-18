@@ -141,9 +141,8 @@ def handle_exit(signum, frame):
 
 
 def main():
-    global data, links  # Make them accessible in the signal handler
+    global data, links
 
-    # Register the signal handler
     signal.signal(signal.SIGINT, handle_exit)
 
     links = [get_links(league, "1X2") for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS]
