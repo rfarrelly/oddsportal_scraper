@@ -21,14 +21,14 @@ ODDSPORTAL_FOOTBALL_SUBDOMAINS = [
     # "scotland/championship/",
     # "scotland/league-one/",
     # "scotland/league-two/",
-    # "germany/bundesliga/",
-    # "germany/2-bundesliga/",
+    "germany/bundesliga/",
+    "germany/2-bundesliga/",
     # "france/ligue-1/",
     # "france/ligue-2/",
-    # "spain/laliga/",
-    # "spain/laliga2/",
-    # "italy/serie-a/",
-    # "italy/serie-b/",
+    "spain/laliga/",
+    "spain/laliga2/",
+    "italy/serie-a/",
+    "italy/serie-b/",
     # "belgium/jupiler-pro-league/",
     # "netherlands/eredivisie/",
     # "netherlands/eerste-divisie/",
@@ -40,7 +40,7 @@ ODDSPORTAL_LOCATORS = {
     "ODDS_XPATH": "//a[contains(@href, '/bookmaker/bet365/betslip/')]",
     "HOME_XPATH": '//*[@id="react-event-header"]/div/div/div[1]/div[1]/div[1]/p',
     "AWAY_XPATH": '//*[@id="react-event-header"]/div/div/div[1]/div[3]/div[2]/p',
-    "DATE_XPATH": '//*[@id="react-event-header"]/div/div/div[2]/div[1]',  #'//*[@id="app"]/div/div[1]/div/main/div[3]/div[2]/div[1]/div[2]/div[1]',  # noqa
+    "DATE_XPATH": '//*[@id="react-event-header"]/div/div/div[2]/div[1]',
 }
 
 ODDSPORTAL_MARKETS = {
