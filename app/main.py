@@ -1,6 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from config.config import (
     ODDSPORTAL_LOCATORS,
@@ -23,9 +26,15 @@ links = []
 
 
 def scrape_webpage(url):
-    options = webdriver.ChromeOptions()
+
+    options = Options()
+    options.binary_location = (
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    )
     options.add_argument("--headless")
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()), options=options
+    )
     driver.get(url)
 
     WebDriverWait(driver, 10).until(
