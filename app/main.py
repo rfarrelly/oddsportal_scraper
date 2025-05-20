@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-from config.config import (
+from config import (
     ODDSPORTAL_LOCATORS,
     ODDSPORTAL_DATE_FORMAT,
     OUTPUT_DATE_FORMAT,
@@ -13,7 +13,7 @@ from config.config import (
 )
 from datetime import datetime
 from fractions import Fraction
-from links.get_match_links import get_links
+from app.get_match_links import get_next_fixture_links
 import pandas as pd
 from itertools import chain
 import concurrent.futures
@@ -99,16 +99,16 @@ def scrape_webpage(url):
         event_date, event_time, event_day = parse_datetime(date_element)
 
         result_data = {
-            "timestamp": datetime.now().isoformat(sep=" ", timespec="minutes"),
-            "date": event_date,
-            "time": event_time,
-            "day": event_day,
-            "league": f"{url.split('/')[4]}-{url.split('/')[5]}",
-            "odds": [round(float(Fraction(f)), 2) for f in odds],
-            "home": home_team,
-            "away": away_team,
-            "market": url.split("/")[7].replace("#", "").split(";")[0].replace("#", ""),
-            "book": ODDSPORTAL_LOCATORS["ODDS_XPATH"].split("/")[4],
+            "Timestamp": datetime.now().isoformat(sep=" ", timespec="minutes"),
+            "Date": event_date,
+            "Time": event_time,
+            "Day": event_day,
+            "League": f"{url.split('/')[4]}-{url.split('/')[5]}",
+            "Odds": [round(float(Fraction(f)), 2) for f in odds],
+            "Home": home_team,
+            "Away": away_team,
+            "Market": url.split("/")[7].replace("#", "").split(";")[0].replace("#", ""),
+            "Book": ODDSPORTAL_LOCATORS["ODDS_XPATH"].split("/")[4],
         }
 
         result_data = expand_odds_fields(result_data)
@@ -239,7 +239,10 @@ def main():
     signal.signal(signal.SIGTERM, handle_exit)
 
     print("Gathering links...")
-    all_links = [get_links(league, "1X2") for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS]
+    all_links = [
+        get_next_fixture_links(league, "1X2")
+        for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS
+    ]
     all_links = list(chain(*all_links))
 
     with links_lock:

@@ -48,4 +48,5 @@ ODDSPORTAL_MARKETS = {
     "1X2": "/#1X2;2",
     "O1.5": "/#over-under;2;1.50;0",
     "O2.5": "/#over-under;2;2.50;0",
+    "dc": "/#double;2",
 }
