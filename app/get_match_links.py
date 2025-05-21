@@ -14,14 +14,18 @@ from config import (
 
 
 def get_next_fixture_links(league_url_frag: str, market: str):
-    url = ODDSPORTAL_BASE_URL + league_url_frag
-    res = requests.get(url, headers=ODDSPORTAL_REQUEST_HEADER)
-    soup = BeautifulSoup(res.content, "lxml")
-    div_tag = soup.find("div", {"class": "empty:min-h-[80vh]"})
-    match_frags = re.findall(ODDSPORTAL_LINKS_REGEX, str(div_tag.contents))
-    market_urls = list(
-        set([url + frag + ODDSPORTAL_MARKETS[market] for frag in match_frags])
-    )
+    try:
+        url = ODDSPORTAL_BASE_URL + league_url_frag
+        res = requests.get(url, headers=ODDSPORTAL_REQUEST_HEADER)
+        soup = BeautifulSoup(res.content, "lxml")
+        div_tag = soup.find("div", {"class": "empty:min-h-[80vh]"})
+        match_frags = re.findall(ODDSPORTAL_LINKS_REGEX, str(div_tag.contents))
+        market_urls = list(
+            set([url + frag + ODDSPORTAL_MARKETS[market] for frag in match_frags])
+        )
+    except Exception as e:
+        print(f"No matches found for {league_url_frag}")
+        return []
 
     print(f"Found {len(market_urls)} matches for {league_url_frag}")
     return market_urls
@@ -76,6 +80,3 @@ def get_historical_links(league_url_frag: str, market: str, page_num: str):
 
     print(f"Found {len(market_urls)} historical matches for {league_url_frag}")
     return market_urls
-
-
-get_historical_links("england/premier-league/", "dc", "1")

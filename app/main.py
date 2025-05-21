@@ -13,7 +13,6 @@ from config import (
 )
 from datetime import datetime
 from fractions import Fraction
-from app.get_match_links import get_next_fixture_links
 import pandas as pd
 from itertools import chain
 import concurrent.futures
@@ -22,6 +21,7 @@ import sys
 import os
 import threading
 import time
+import argparse
 
 # Global variables with thread-safe access
 data_lock = threading.Lock()
@@ -112,7 +112,7 @@ def scrape_webpage(url):
         }
 
         result_data = expand_odds_fields(result_data)
-        result_data.pop("odds")
+        result_data.pop("Odds")
 
         return result_data
 
@@ -162,10 +162,10 @@ def parse_datetime(date: str) -> tuple[str]:
 
 
 def expand_odds_fields(data: dict):
-    if data["market"] == "1X2":
-        data[f"{data['book']}H"] = data["odds"][0]
-        data[f"{data['book']}D"] = data["odds"][1]
-        data[f"{data['book']}A"] = data["odds"][2]
+    if data["Market"] == "1X2":
+        data[f"{data['Book']}H"] = data["Odds"][0]
+        data[f"{data['Book']}D"] = data["Odds"][1]
+        data[f"{data['Book']}A"] = data["Odds"][2]
     return data
 
 
@@ -189,7 +189,7 @@ def save_data():
     """Save the collected data to a CSV file"""
     with data_lock:
         if data:
-            data_df = pd.DataFrame(data).sort_values("date")
+            data_df = pd.DataFrame(data).sort_values("Date")
             data_df.to_csv("fixtures.csv", index=False)
             print(f"Saved collected data to fixtures.csv ({len(data)} records)")
         else:
@@ -238,11 +238,26 @@ def main():
     signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGTERM, handle_exit)
 
-    print("Gathering links...")
-    all_links = [
-        get_next_fixture_links(league, "1X2")
-        for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS
-    ]
+    parser = argparse.ArgumentParser(description="Scrape OddsPortal fixtures.")
+    parser.add_argument(
+        "--mode",
+        choices=["future", "historical"],
+        default="future",
+        help="Choose whether to scrape future or historical fixtures",
+    )
+    args = parser.parse_args()
+
+    print(f"Gathering links for {args.mode} fixtures...")
+
+    if args.mode == "future":
+        from get_match_links import get_next_fixture_links as get_links
+    elif args.mode == "historical":
+        from get_match_links import get_historical_links as get_links
+    else:
+        raise ValueError("Invalid mode")
+
+    all_links = [get_links(league, "1X2") for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS]
+
     all_links = list(chain(*all_links))
 
     with links_lock:
