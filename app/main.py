@@ -239,7 +239,14 @@ def main():
     signal.signal(signal.SIGTERM, handle_exit)
 
     print("Gathering links...")
-    all_links = [get_links(league, "1X2") for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS]
+    all_links = []
+    for league in ODDSPORTAL_FOOTBALL_SUBDOMAINS:
+        try:
+            all_links.append(get_links(league, "1X2"))
+        except:
+            print(f"Nothing found for {league} ...")
+            continue
+
     all_links = list(chain(*all_links))
 
     with links_lock:
